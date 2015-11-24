@@ -18,10 +18,11 @@
 # This task file will contain instructions to perform, for example
 # copy, install, download etc
 
-# Supported tasks, first one is sample, this can be extended to any number
-# of opetations. See case statements below
+# Supported tasks shown below, first one is sample, this can be extended
+# to any number of opetations. See case statements at the end
 
-# date;download;url;from;to;package; #sample
+# date;task;url;from;to;package; #sample
+# date;download;url;null;to;null;
 # date;copy;null;from;to;null;
 # date;move;null;from;to;null;
 # date;install;null;null;null;package;
@@ -59,7 +60,31 @@ for line in $(cat $task_file_temp);
 
 		case $task in
 			download )
-				echo 'detected download' ;;
+				# Get other required parameters
+				url=$(echo $line | cut -d ';' -f 3)
+				to=$(echo $line | cut -d ';' -f 5)
+				# Download file if only updated, '-q' for quiet
+				wget -qN $url -P $to
+				# Change ownership of the file to default user
+				# Only user's home directory file should have user
+				# permission(mostly). In all other destinations
+				# let the permission be default 'root'.
+				detect_home_dir=$(echo $to | cut -d '/' -f -1)
+				# $BUG$: Storing files in /home is not possible
+				# It will confuse the file name with user
+				# $WORKAROUND$: Avoid storing files /home. Store in
+				# /home/user/*/ unless we fix it.
+				# HELP: Is it possible to get current user logged in
+				#	through X-server/lightdm?
+				if [ $detect_home_dir=="home" ] ; then
+					# Now get the user
+					user=$(echo $to | cut -d '/' -f 3)
+					# Now obtain the downloaded file
+					downloaded_file=$(echo ${url##*/})
+		                 	chown -v $user.$user $to$downloaded_file
+				fi
+				;;
+
 			copy )
 				echo 'detected copy' ;;
 			move )
