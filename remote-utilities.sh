@@ -15,39 +15,69 @@
 
 #######################################################################
 
-# This markup file will contain instructions to perform, for example
+# This task file will contain instructions to perform, for example
 # copy, install, download etc
 
-# Example content for 'task.csv' file
-# date;download;url;from;to;null;
+# Supported tasks, first one is sample, this can be extended to any number
+# of opetations. See case statements below
+
+# date;download;url;from;to;package; #sample
 # date;copy;null;from;to;null;
 # date;move;null;from;to;null;
 # date;install;null;null;null;package;
 # date;update;null;null;to;null;
+# date;exec;null;null;null;null;
 
-markup_file_url="http://127.0.0.1/task.csv"
+task_file_url="http://127.0.0.1/task.csv"
 
-# Hiding it, just in case!
-markup_file_local="/tmp/.task.csv"
+# Present(local) task file
+task_file_present="$PWD/task.csv"
 
-# Local log file, containing epoch time of applied update
-log_file=$PWD/log.txt
+# Updated task file(recently downloaded from server)
+task_file_updated="$PWD/updatedtask.csv"
 
-# Download the markup file if updated
-wget -qN $markup_file_url -O $markup_file_local
+# Temporary diff file containing new updates to be applied
+task_file_temp="$PWD/temp.csv"
 
-# Read the local log file for previously applied updates(if any)
-# A log file should be a simple text file with time of update in epoch
-# For eg;
-# 1448366811
-# 2448322832
-# We believe no two update will have same time stamp
-# Iterate over these numbers and skip whichever already applied(simple?)
+# Download the task file if updated, and save it as new task file
+wget -qN $task_file_url -O $task_file_updated
 
-for line in $(cat $markup_file_local);
+# Create a local task file for the first run
+if [ ! -e $task_file_present ] ; then touch $task_file_present; fi
+
+# Find diff between present and new task file and create a temporary file
+# containing only updated tasks. Once done, remove the temporary file and
+# make updated file as present task file
+# '-3' means supress line that appear in both files
+comm -3 $task_file_updated $task_file_present > $task_file_temp
+
+# Now scan tasks available in 2nd column and jump to respective case
+for line in $(cat $task_file_temp);
 	do
-		echo $line
+		# This will return the task to be performed, eg; copy, download
+		task=$(echo $line | cut -d ';' -f 2)
+
+		case $task in
+			download )
+				echo 'detected download' ;;
+			copy )
+				echo 'detected copy' ;;
+			move )
+				echo 'detected move' ;;
+			install )
+				echo 'detected install' ;;
+			update )
+				echo 'detected update' ;;
+			exec )
+				echo 'detected execute command' ;;
+		esac
 	done
+
+
+
+
+
+
 
 
 
