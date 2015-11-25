@@ -1,12 +1,12 @@
 README
 ======
 
-A simple shell script to send instructions/commands to remote
-machine(s).
+A simple shell script to read commands from server and execute
+them locally.
 
-This script will do the following
+The ``remote-utilities.sh`` script will do the following
 
-* Check for updated ``tasks.txt`` file on server. If not, exit.
+* Check for updated ``tasks.txt`` file on server. If not, EXIT.
 
 * Download ``tasks.txt`` file.
 
