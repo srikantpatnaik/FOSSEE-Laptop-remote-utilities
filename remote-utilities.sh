@@ -15,19 +15,8 @@
 
 #######################################################################
 
-# This task file will contain instructions to perform, for example
+# This task file will contain commands to execute, for example
 # copy, install, download etc
-
-# Supported tasks shown below, first one is sample, this can be extended
-# to any number of opetations. See case statements at the end
-
-# date;task;url;from;to;package; #sample
-# date;download;url;null;to;null;
-# date;copy;null;from;to;null;
-# date;move;null;from;to;null;
-# date;install;null;null;null;package;
-# date;update;null;null;to;null;
-# date;exec;null;null;null;null;
 
 task_file_url="http://127.0.0.1/task.csv"
 
@@ -40,6 +29,9 @@ task_file_updated="$PWD/updatedtask.csv"
 # Temporary diff file containing new updates to be applied
 task_file_temp="$PWD/temp.csv"
 
+# Create a log file
+logfile="$PWD/log.txt"
+
 # Download the task file if updated, and save it as new task file
 wget -qN $task_file_url -O $task_file_updated
 
@@ -50,60 +42,17 @@ if [ ! -e $task_file_present ] ; then touch $task_file_present; fi
 # containing only updated tasks. Once done, remove the temporary file and
 # make updated file as present task file
 # '-3' means supress line that appear in both files
-comm -3 $task_file_updated $task_file_present > $task_file_temp
+comm --nocheck-order -3 $task_file_updated $task_file_present > $task_file_temp
 
-# Now scan tasks available in 2nd column and jump to respective case
-for line in $(cat $task_file_temp);
+while read command
 	do
-		# This will return the task to be performed, eg; copy, download
-		task=$(echo $line | cut -d ';' -f 2)
+		echo $(date) >> $logfile
+		# Execute the command
+		$command >> $logfile
+		printf "\n\n" >> $logfile
+		sleep 1
+	done < $task_file_temp
 
-		case $task in
-			download )
-				# Get other required parameters
-				url=$(echo $line | cut -d ';' -f 3)
-				to=$(echo $line | cut -d ';' -f 5)
-				# Download file if only updated, '-q' for quiet
-				wget -qN $url -P $to
-				# Change ownership of the file to default user
-				# Only user's home directory file should have user
-				# permission(mostly). In all other destinations
-				# let the permission be default 'root'.
-				detect_home_dir=$(echo $to | cut -d '/' -f -1)
-				# $BUG$: Storing files in /home is not possible
-				# It will confuse the file name with user
-				# $WORKAROUND$: Avoid storing files /home. Store in
-				# /home/user/*/ unless we fix it.
-				# HELP: Is it possible to get current user logged in
-				#	through X-server/lightdm?
-				if [ $detect_home_dir=="home" ] ; then
-					# Now get the user
-					user=$(echo $to | cut -d '/' -f 3)
-					# Now obtain the downloaded file
-					downloaded_file=$(echo ${url##*/})
-		                 	chown -v $user.$user $to$downloaded_file
-				fi
-				;;
-
-			copy )
-				echo 'detected copy' ;;
-			move )
-				echo 'detected move' ;;
-			install )
-				echo 'detected install' ;;
-			update )
-				echo 'detected update' ;;
-			exec )
-				echo 'detected execute command' ;;
-		esac
-	done
-
-
-
-
-
-
-
-
-
-
+# Once done copy updated task file to present file and remove the temp & updated file
+cp $task_file_updated $task_file_present
+rm $task_file_updated $task_file_temp
