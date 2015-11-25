@@ -35,8 +35,11 @@ task_file_temp="$DIR/temp.txt"
 # Create a log file
 logfile="$DIR/log.txt"
 
-# Download the task file if updated, and save it as new task file
-wget -qN $task_file_url -O $task_file_updated
+# Check if file is updated in server. If not exit(quit program)
+wget -N $task_file_url 2>&1 >/dev/null | grep -q not\ retrieving && exit
+
+# Download the updated task file
+wget $task_file_url -O $task_file_updated
 
 # Create a local task file for the first run
 if [ ! -e $task_file_present ] ; then touch $task_file_present; fi
