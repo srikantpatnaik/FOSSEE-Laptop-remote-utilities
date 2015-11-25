@@ -20,17 +20,20 @@
 
 task_file_url="http://www.it.iitb.ac.in/AakashApps/repo/FOSSEE-Laptop-kvpowai/tasks.txt"
 
+# Get the PATH of the running script
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
 # Present(local) task file
-task_file_present="$PWD/tasks.txt"
+task_file_present="$DIR/tasks.txt"
 
 # Updated task file(recently downloaded from server)
-task_file_updated="$PWD/updatedtasks.txt"
+task_file_updated="$DIR/updatedtasks.txt"
 
 # Temporary diff file containing new updates to be applied
-task_file_temp="$PWD/temp.txt"
+task_file_temp="$DIR/temp.txt"
 
 # Create a log file
-logfile="$PWD/log.txt"
+logfile="$DIR/log.txt"
 
 # Download the task file if updated, and save it as new task file
 wget -qN $task_file_url -O $task_file_updated
