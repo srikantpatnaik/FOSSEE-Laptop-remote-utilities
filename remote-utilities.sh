@@ -18,16 +18,16 @@
 # This task file will contain commands to execute, for example
 # copy, install, download etc
 
-task_file_url="http://127.0.0.1/task.csv"
+task_file_url="http://www.it.iitb.ac.in/AakashApps/repo/FOSSEE-Laptop-kvpowai/tasks.txt"
 
 # Present(local) task file
-task_file_present="$PWD/task.csv"
+task_file_present="$PWD/tasks.txt"
 
 # Updated task file(recently downloaded from server)
-task_file_updated="$PWD/updatedtask.csv"
+task_file_updated="$PWD/updatedtasks.txt"
 
 # Temporary diff file containing new updates to be applied
-task_file_temp="$PWD/temp.csv"
+task_file_temp="$PWD/temp.txt"
 
 # Create a log file
 logfile="$PWD/log.txt"
